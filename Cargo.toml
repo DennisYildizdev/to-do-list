@@ -1,0 +1,35 @@
+[package]
+name = "yapilacaklar"
+version = "0.2.0"
+edition = "2024"
+license = "MIT"
+description = "One more step: a calm to-do list written in Rust and WebAssembly."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Must match the installed wasm-bindgen CLI version.
+wasm-bindgen = "=0.2.130"
+js-sys = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+web-sys = { version = "0.3", features = [
+  "Document",
+  "DomTokenList",
+  "Element",
+  "Event",
+  "EventTarget",
+  "HtmlCollection",
+  "HtmlElement",
+  "HtmlInputElement",
+  "Node",
+  "Storage",
+  "Window",
+] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"

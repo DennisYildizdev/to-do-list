@@ -1,58 +1,109 @@
-# Yapılacaklar — Bir adım daha
+# One more step
 
-## Lisans
+A calm to-do list that works on phone screens. Your next open task is shown large at the top. Everything else waits quietly below it.
 
-Bu proje [MIT lisansı](LICENSE) ile sunulmaktadır.
+It's written in Rust and compiled to WebAssembly. It started as a first GitHub project for learning HTML, CSS, JavaScript and the basic Git workflow, and was later rewritten in Rust.
 
-Türkçe, sade ve telefon ekranlarına uyumlu bir yapılacaklar uygulaması. İlk GitHub projesi olarak HTML, CSS, JavaScript ve Git'in temel akışını öğrenmek için hazırlanmıştır.
+## License
 
-## Kullanım
+This project is released under the [MIT license](LICENSE).
 
-Bu klasördeki `index.html` dosyasını bir tarayıcıyla aç. Kurulum, sunucu veya paket yüklemesi gerekmez. Görevini yazıp **Ekle** düğmesine veya Enter'a bas. Kutucuğu işaretleyerek tamamla, tekrar tıklayarak geri al. Çöp kutusu düğmesi görevi siler.
+## Use
 
-## Özellikler
+Type a task and press **Add** or Enter. **Mark as done** completes the task at the top, and the next one moves up. To complete or reopen any other task, use its circle. The trash button deletes a task.
 
-- Görev ekleme, tamamlama, geri alma ve silme.
-- Boş görev kontrolü, klavye kullanımı ve görünür odak göstergeleri.
-- Türkçe karakterler, dar ekranlar ve uzun görev metinleri için destek.
-- Tarayıcıda yerel kayıt; kayıt sorunu olduğunda anlaşılır uyarı.
-- Ek kütüphane, hesap veya sunucu gerektirmez.
+Browsers don't load WebAssembly from a local file, so double-clicking `index.html` won't work. Serve the folder instead:
 
-Görevler yalnızca kullanılan tarayıcıda saklanır; GitHub'a gönderilmez. Tarayıcı verileri silinirse görevler de silinir. Cihazlar arasında eşitlenmez. Yerel dosya ve yayınlanan site ayrı kayıt alanları kullanır. Aynı listeyi birden fazla sekmede eşzamanlı düzenlemek desteklenmez.
+```bash
+python -m http.server 8000
+```
 
-## Proje yapısı
+Then open http://localhost:8000. GitHub Pages works too.
 
-- `index.html`: Sayfa yapısı ve erişilebilir etiketler.
-- `style.css`: Görünüm ve mobil düzen.
-- `script.js`: Görev işlemleri ve localStorage kaydı.
-- `.nojekyll`: GitHub Pages için doğrudan statik yayın.
+## Features
 
-## GitHub Desktop ile öğrenme
+- Add, complete, reopen and delete tasks.
+- The next open task stays in focus. Completed tasks move to the end of the list.
+- Rejects empty tasks. Works with the keyboard and shows visible focus rings.
+- Supports Turkish characters, narrow screens, long task text and dark mode.
+- Saves in the browser and gives a clear warning when saving fails. A save it can't read is never overwritten.
+- Reads lists saved by the earlier JavaScript version.
+- No account and no server.
 
-1. **File → Add local repository** ile bu klasörü seç.
-2. Henüz Git deposu değilse **create a repository here** seçeneğini kullan.
-3. Değişiklikleri incele, kısa bir açıklama yaz ve **Commit to main** seç.
-4. **Publish repository** seçeneğinde adı `yapilacaklar` yap ve **Keep this code private** işaretini kaldırarak yayınla.
-5. Sonraki değişikliklerinde önce commit, sonra **Push origin** kullan.
+Tasks are stored only in the browser you use. They are never sent to GitHub. Clearing browser data deletes them. They don't sync across devices. Editing the same list in several tabs at once isn't supported.
 
-**Commit**, değişikliklerin bilgisayarındaki açıklamalı kaydıdır. **Push**, bu kayıtları GitHub'a gönderir. Kaydedilmiş bir dosya, commit ve push yapılana kadar GitHub'da güncellenmez.
+## Project structure
 
-## GitHub Pages ile yayınlama
+- `index.html`: page structure and accessible labels.
+- `style.css`: appearance, dark mode and mobile layout.
+- `src/tasks.rs`: the task model, saved-data checks and unit tests. It has no browser code.
+- `src/lib.rs`: DOM rendering, events and localStorage.
+- `pkg/`: the compiled WebAssembly and its JavaScript glue. It's committed so GitHub Pages can serve it.
+- `build.ps1`: builds `pkg/`.
+- `.nojekyll`: lets GitHub Pages serve the files as they are.
 
-Depoda **Settings → Pages → Build and deployment** bölümüne gir. Kaynak olarak **Deploy from a branch**, dal olarak **main**, klasör olarak **/(root)** seçip kaydet. Yayın tamamlandığında aynı bölümde verilen site adresini aç. Bu adresi README'ye ve deponun **About → Website** alanına ekle.
+## Build
 
-Sonrasında `index.html` içindeki alt bilgi cümlesini değiştir, commit yap ve **Push origin** ile gönder. Pages yayını tamamlanınca sitede yeni metni kontrol et.
+One-time setup:
 
-## Kontrol listesi
+```bash
+rustup target add wasm32-unknown-unknown
+```
 
-- [ ] Ekle düğmesi ve Enter ile görev ekleniyor.
-- [ ] Boşluklardan oluşan görev reddediliyor.
-- [ ] Tamamlama, geri alma ve silme çalışıyor.
-- [ ] Yenileme sonrası görevler ve tamamlanma durumu korunuyor.
-- [ ] Türkçe karakterler ve uzun metinler doğru görünüyor.
-- [ ] Tab, Enter ve Space ile görevler yönetilebiliyor.
-- [ ] Telefon genişliğinde yatay taşma olmuyor.
-- [ ] Yayındaki sürümde de tüm işlemler çalışıyor.
-- [ ] Commit ve push sonrası metin değişikliği canlı sitede görünüyor.
+```bash
+cargo install wasm-bindgen-cli --version 0.2.130 --locked
+```
 
-Resmî rehberler: [GitHub Desktop](https://docs.github.com/en/desktop/overview/creating-your-first-repository-using-github-desktop) · [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
+Build, in PowerShell:
+
+```bash
+./build.ps1
+```
+
+Or run the two steps by hand in any shell:
+
+```bash
+cargo build --release --target wasm32-unknown-unknown
+```
+
+```bash
+wasm-bindgen --target web --no-typescript --out-dir pkg target/wasm32-unknown-unknown/release/yapilacaklar.wasm
+```
+
+Run the tests:
+
+```bash
+cargo test
+```
+
+The `wasm-bindgen` CLI version must match the `wasm-bindgen` version in `Cargo.toml`.
+
+## Learning with GitHub Desktop
+
+1. Choose **File → Add local repository** and pick this folder.
+2. If it isn't a Git repository yet, use **create a repository here**.
+3. Review your changes, write a short summary and choose **Commit to main**.
+4. In **Publish repository**, name it `yapilacaklar`, clear **Keep this code private** and publish.
+5. After that, commit first and then use **Push origin** for each change.
+
+A **commit** is a described snapshot of your changes, saved on your computer. A **push** sends those commits to GitHub. A saved file doesn't change on GitHub until you commit and push it.
+
+## Publishing with GitHub Pages
+
+In the repository, open **Settings → Pages → Build and deployment**. Choose **Deploy from a branch** as the source, **main** as the branch and **/(root)** as the folder, then save. When it finishes publishing, open the site address shown in the same section. Add that address to this README and to the repository's **About → Website** field.
+
+Then change the footer sentence in `index.html`, commit and **Push origin**. Once Pages has published again, check the new text on the site. After a change to the Rust code, rebuild `pkg/` before you commit.
+
+## Checklist
+
+- [ ] The Add button and Enter both add a task.
+- [ ] A task made only of spaces is rejected.
+- [ ] Mark as done, reopen and delete all work.
+- [ ] Tasks and their completed state survive a reload.
+- [ ] Turkish characters and long text display correctly.
+- [ ] Tasks can be managed with Tab, Enter and Space.
+- [ ] There's no horizontal scrolling at phone width.
+- [ ] Everything works on the published site too.
+- [ ] After a commit and push, a text change appears on the live site.
+
+Official guides: [GitHub Desktop](https://docs.github.com/en/desktop/overview/creating-your-first-repository-using-github-desktop) · [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
